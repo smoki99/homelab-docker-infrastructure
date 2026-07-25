@@ -1,0 +1,56 @@
+name: nextcloud-stack
+
+networks:
+  proxy:
+    external: true  # Joins the global "proxy" network created by 01-networking
+    name: proxy
+  internal:
+    internal: true  # Private network isolated for Nextcloud DB and Redis
+
+services:
+  app:
+    container_name: nextcloud-app
+    image: nextcloud:latest
+    restart: always
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=${NEXTCLOUD_APP_MYSQL_DATABASE}
+      - MYSQL_USER=${NEXTCLOUD_APP_MYSQL_USER}
+      - MYSQL_PASSWORD=${NEXTCLOUD_APP_MYSQL_PASSWORD}
+      - REDIS_HOST=redis
+    depends_on:
+      - db
+      - redis
+    networks:
+      - proxy
+      - internal
+    volumes:
+      - ${NEXTCLOUD_APP_DATASET_HTML}:/var/www/html
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.nextcloud.rule=Host(`nextcloud.vr-worlds.eu`) || Host(`nextcloud.vr-worlds.de`)
+      - traefik.http.routers.nextcloud.entrypoints=web
+      - traefik.http.services.nextcloud.loadbalancer.server.port=80
+
+  db:
+    container_name: nextcloud-db
+    image: mariadb:10.11
+    restart: always
+    command: '--transaction-isolation=READ-COMMITTED --log-bin-trust-function-creators=1'
+    environment:
+      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_APP_MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${NEXTCLOUD_APP_MYSQL_DATABASE}
+      - MYSQL_USER=${NEXTCLOUD_APP_MYSQL_USER}
+      - MYSQL_PASSWORD=${NEXTCLOUD_APP_MYSQL_PASSWORD}
+    networks:
+      - internal
+    volumes:
+      - ${NEXTCLOUD_APP_DATASET_DB}:/var/lib/mysql:rw
+
+  redis:
+    container_name: nextcloud-redis
+    image: redis:alpine
+    restart: always
+    networks:
+      - internal

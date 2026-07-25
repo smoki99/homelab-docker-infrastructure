@@ -1,0 +1,33 @@
+name: networking-stack
+
+networks:
+  proxy:
+    name: proxy
+
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:v3.0
+    restart: always
+    command:
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
+      - '--api.dashboard=true'
+      - '--api.insecure=true'
+    ports:
+      - '127.0.0.1:8080:8080'
+    networks:
+      - proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  cloudflared:
+    container_name: cloudflared
+    image: cloudflare/cloudflared:latest
+    restart: always
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_API_TOKEN}
+    command: tunnel --no-autoupdate run
+    networks:
+      - proxy

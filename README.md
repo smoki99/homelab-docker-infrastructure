@@ -1,22 +1,23 @@
-# ☁️ Self-Hosted Nextcloud Infrastructure
+# ☁️ Homelab Docker Infrastructure
 
-A secure, high-performance, containerized Nextcloud deployment running on Docker, managed via Traefik reverse proxy and exposed securely through a Cloudflare Zero Trust Tunnel.
+A modular, decoupled Infrastructure as Code (IaC) setup for hosting web services on Docker, Traefik, and Cloudflare Zero Trust Tunnels.
 
 ---
 
 ## 🏗️ Architecture Overview
 
-Traffic is routed securely through Cloudflare's Edge Network into a local `cloudflared` container, passing through Traefik to the Nextcloud application. Internal database and caching services are strictly isolated on a private Docker network.
+The infrastructure is split into decoupled stacks using an external shared Docker network (`proxy`). Networking services (Traefik & Cloudflared) are isolated from application-specific databases and caches.
 
 ```mermaid
 graph TD
     Client[Internet / Users] -->|HTTPS| CF[Cloudflare Edge / Tunnel]
     
     subgraph Host Server
-        subgraph Proxy Network
+        subgraph Shared Proxy Network
             CF -->|Encrypted Tunnel| CFTunnel[cloudflared Container]
             CFTunnel --> Traefik[Traefik Reverse Proxy]
-            Traefik --> App[Nextcloud App Container]
+            Traefik -->|Discovered via Socket| App[Nextcloud App Container]
+            Traefik -.->|Future Apps| FutureApp[Future Container / App]
         end
         
         subgraph Private Internal Network
@@ -29,5 +30,3 @@ graph TD
             DB ---|DB Dataset| DBData[/mnt/slow-data-pool-1/apps/nextcloud_db\]
         end
     end
-
-    
