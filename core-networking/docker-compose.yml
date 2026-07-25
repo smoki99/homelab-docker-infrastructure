@@ -27,6 +27,7 @@ services:
       - ${NEXTCLOUD_APP_DATASET_HTML}:/var/www/html
     labels:
       - traefik.enable=true
+      - traefik.docker.network=proxy 
       - traefik.http.routers.nextcloud.rule=Host(`nextcloud.vr-worlds.eu`) || Host(`nextcloud.vr-worlds.de`)
       - traefik.http.routers.nextcloud.entrypoints=web
       - traefik.http.services.nextcloud.loadbalancer.server.port=80
