@@ -8,26 +8,23 @@ networks:
 services:
   desktop:
     container_name: linux-desktop
-    # 🎯 SWITCH TO PURE noVNC HTML5 DESKTOP:
-    image: lscr.io/linuxserver/rdesktop:ubuntu-xfce
+    image: accetto/ubuntu-vnc-xfce-g3:latest
     restart: always
     shm_size: "1gb"
-    security_opt:
-      - seccomp:unconfined
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Berlin
+      - VNC_PW=${DESKTOP_VNC_PASSWORD}
+      - VNC_RESOLUTION=1280x720
     networks:
       - proxy
     volumes:
-      - ${DESKTOP_APP_DATASET_CONFIG}:/config
+      - ${DESKTOP_APP_DATASET_CONFIG}:/home/headless
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
       - traefik.http.routers.webtop.rule=Host(`desktop.vr-worlds.eu`)
       - traefik.http.routers.webtop.entrypoints=web
-      - traefik.http.services.webtop.loadbalancer.server.port=3000
+      # 🎯 noVNC listens on HTTP port 6901:
+      - traefik.http.services.webtop.loadbalancer.server.port=6901
 
-      # 🔒 Microsoft Entra ID SSO Protection
+      # 🔒 Microsoft Entra ID Protection
       - traefik.http.routers.webtop.middlewares=entra-auth@docker
