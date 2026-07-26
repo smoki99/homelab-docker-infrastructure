@@ -10,6 +10,7 @@ services:
     container_name: linux-desktop
     image: lscr.io/linuxserver/webtop:ubuntu-xfce
     restart: always
+    shm_size: "1gb" 
     security_opt:
       - seccomp:unconfined
     environment:
