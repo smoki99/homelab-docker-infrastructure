@@ -38,14 +38,17 @@ services:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
     restart: always
     environment:
-      # Use Native Azure / Entra Provider
+      # Microsoft Azure / Entra Provider Settings
       - OAUTH2_PROXY_PROVIDER=azure
       - OAUTH2_PROXY_AZURE_TENANT=${ENTRA_TENANT_ID}
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=https://login.microsoftonline.com/${ENTRA_TENANT_ID}/v2.0
       - OAUTH2_PROXY_CLIENT_ID=${ENTRA_CLIENT_ID}
       - OAUTH2_PROXY_CLIENT_SECRET=${ENTRA_CLIENT_SECRET}
       
-      # Settings
+      # Auto-Skip Sign-In Button Page
       - OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true
+      
+      # Traefik ForwardAuth & Cookie Settings
       - OAUTH2_PROXY_UPSTREAMS=static://202
       - OAUTH2_PROXY_REVERSE_PROXY=true
       - OAUTH2_PROXY_COOKIE_SECRET=${OAUTH2_COOKIE_SECRET}
@@ -65,6 +68,7 @@ services:
       - traefik.http.routers.oauth2-proxy.entrypoints=web
       - traefik.http.services.oauth2-proxy.loadbalancer.server.port=4180
 
+      # Traefik ForwardAuth Middleware
       - traefik.http.middlewares.entra-auth.forwardauth.address=http://oauth2-proxy:4180/
       - traefik.http.middlewares.entra-auth.forwardauth.trustForwardHeader=true
       - traefik.http.middlewares.entra-auth.forwardauth.authResponseHeaders=X-Auth-Request-User,X-Auth-Request-Email
