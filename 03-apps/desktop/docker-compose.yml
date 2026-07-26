@@ -8,9 +8,10 @@ networks:
 services:
   desktop:
     container_name: linux-desktop
-    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    # 🎯 SWITCH TO PURE noVNC HTML5 DESKTOP:
+    image: lscr.io/linuxserver/rdesktop:ubuntu-xfce
     restart: always
-    shm_size: "1gb" 
+    shm_size: "1gb"
     security_opt:
       - seccomp:unconfined
     environment:
@@ -28,5 +29,5 @@ services:
       - traefik.http.routers.webtop.entrypoints=web
       - traefik.http.services.webtop.loadbalancer.server.port=3000
 
-      # 🔒 PROTECT DESKTOP WITH MICROSOFT ENTRA ID SSO:
+      # 🔒 Microsoft Entra ID SSO Protection
       - traefik.http.routers.webtop.middlewares=entra-auth@docker
