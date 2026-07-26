@@ -31,3 +31,35 @@ services:
     command: tunnel --no-autoupdate run
     networks:
       - proxy
+
+  # Microsoft Entra ID Authentication Gateway
+  oauth2-proxy:
+    container_name: oauth2-proxy
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+    restart: always
+    environment:
+      - OAUTH2_PROXY_PROVIDER=oidc
+      - OAUTH2_PROXY_PROVIDER_DISPLAY_NAME="Microsoft Entra Login"
+      - OAUTH2_PROXY_CLIENT_ID=${ENTRA_CLIENT_ID}
+      - OAUTH2_PROXY_CLIENT_SECRET=${ENTRA_CLIENT_SECRET}
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=https://login.microsoftonline.com/${ENTRA_TENANT_ID}/v2.0
+      - OAUTH2_PROXY_COOKIE_SECRET=${OAUTH2_COOKIE_SECRET}
+      - OAUTH2_PROXY_COOKIE_DOMAINS=.vr-worlds.eu
+      - OAUTH2_PROXY_COOKIE_SECURE=true
+      - OAUTH2_PROXY_EMAIL_DOMAINS=*
+      - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
+      - OAUTH2_PROXY_REDIRECT_URL=https://auth.vr-worlds.eu/oauth2/callback
+      - OAUTH2_PROXY_SET_XAUTHREQUEST=true
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.oauth2-proxy.rule=Host(`auth.vr-worlds.eu`)
+      - traefik.http.routers.oauth2-proxy.entrypoints=web
+      - traefik.http.services.oauth2-proxy.loadbalancer.server.port=4180
+
+      # Traefik ForwardAuth Middleware (Reusable by ANY application!)
+      - traefik.http.middlewares.entra-auth.forwardauth.address=http://oauth2-proxy:4180/
+      - traefik.http.middlewares.entra-auth.forwardauth.trustForwardHeader=true
+      - traefik.http.middlewares.entra-auth.forwardauth.authResponseHeaders=X-Auth-Request-User,X-Auth-Request-Email
