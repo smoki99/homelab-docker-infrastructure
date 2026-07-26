@@ -1,0 +1,116 @@
+/* ==========================================================================
+   VR-Worlds DevOps / Tech Theme for Microsoft Entra External ID
+   Aesthetic: Dark Slate, Glassmorphism, Modern Tech Accents
+   ========================================================================== */
+
+:root {
+  --bg-dark: #090d16;
+  --panel-bg: rgba(15, 23, 42, 0.75);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-primary: #3b82f6; /* Electric DevOps Blue */
+  --accent-hover: #2563eb;
+  --accent-glow: rgba(59, 130, 246, 0.35);
+  --input-bg: rgba(30, 41, 59, 0.8);
+  --input-border: rgba(148, 163, 184, 0.2);
+  --radius-lg: 16px;
+  --radius-md: 10px;
+}
+
+/* 1. Page Background & Mesh Gradient */
+body {
+  background-color: var(--bg-dark) !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: var(--text-primary) !important;
+}
+
+/* 2. Glassmorphism Login Card Container */
+.ext-sign-in-box, 
+.panel, 
+.card, 
+div[role="main"] {
+  background: var(--panel-bg) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid var(--panel-border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 30px var(--accent-glow) !important;
+  padding: 40px !important;
+}
+
+/* 3. Typography & Headings */
+h1, h2, .text-title {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+p, label, .text-caption, .subtext {
+  color: var(--text-secondary) !important;
+}
+
+/* 4. Modern Input Text Fields */
+input[type="text"], 
+input[type="email"], 
+input[type="password"] {
+  background-color: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-primary) !important;
+  padding: 12px 16px !important;
+  font-size: 15px !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Input Focus Glow Ring */
+input[type="text"]:focus, 
+input[type="email"]:focus, 
+input[type="password"]:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow) !important;
+  outline: none !important;
+}
+
+/* 5. Primary Action Button (Sign In) */
+input[type="submit"], 
+button.btn-primary, 
+.button_primary {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover)) !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  padding: 14px 24px !important;
+  font-size: 15px !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 15px var(--accent-glow) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+input[type="submit"]:hover, 
+button.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* 6. Links & Secondary Actions */
+a, .use-other-means-link {
+  color: var(--accent-primary) !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease !important;
+}
+
+a:hover {
+  color: #60a5fa !important;
+  text-decoration: underline !important;
+}
+
+/* 7. Footer Branding Accent */
+#footer {
+  color: var(--text-secondary) !important;
+  opacity: 0.8;
+}

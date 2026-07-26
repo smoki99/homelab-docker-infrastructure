@@ -1,0 +1,31 @@
+name: desktop-stack
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+
+services:
+  desktop:
+    container_name: linux-desktop
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    restart: always
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    networks:
+      - proxy
+    volumes:
+      - ${DESKTOP_APP_DATASET_CONFIG}:/config
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.webtop.rule=Host(`desktop.vr-worlds.eu`)
+      - traefik.http.routers.webtop.entrypoints=web
+      - traefik.http.services.webtop.loadbalancer.server.port=3000
+
+      # 🔒 PROTECT DESKTOP WITH MICROSOFT ENTRA ID SSO:
+      - traefik.http.routers.webtop.middlewares=entra-auth@docker
