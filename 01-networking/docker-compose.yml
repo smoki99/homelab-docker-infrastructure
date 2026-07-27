@@ -2,7 +2,7 @@ name: networking-stack
 
 networks:
   proxy:
-    name: proxy
+    name: ${SHARED_NETWORK}
 
 services:
   traefik:
@@ -18,7 +18,7 @@ services:
     ports:
       - '127.0.0.1:8080:8080'
     networks:
-      - proxy
+      - ${SHARED_NETWORK}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
@@ -30,7 +30,7 @@ services:
       - TUNNEL_TOKEN=${CLOUDFLARE_API_TOKEN}
     command: tunnel --no-autoupdate run
     networks:
-      - proxy
+      - ${SHARED_NETWORK}
 
   # Microsoft Entra ID Authentication Gateway
   oauth2-proxy:
@@ -62,10 +62,10 @@ services:
       - OAUTH2_PROXY_REDIRECT_URL=https://auth.vr-worlds.eu/oauth2/callback
       - OAUTH2_PROXY_SET_XAUTHREQUEST=true
     networks:
-      - proxy
+      - ${SHARED_NETWORK}
     labels:
       - traefik.enable=true
-      - traefik.docker.network=proxy
+      - traefik.docker.network=${SHARED_NETWORK}
       - traefik.http.routers.oauth2-proxy.rule=Host(`auth.vr-worlds.eu`)
       - traefik.http.routers.oauth2-proxy.entrypoints=web
       - traefik.http.services.oauth2-proxy.loadbalancer.server.port=4180

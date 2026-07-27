@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:${GITLAB_VERSION:-latest}
+    container_name: gitlab
+    restart: always
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        # Set external URL directly to IP and Port
+        external_url 'http://${SERVER_IP}:${GITLAB_HTTP_PORT}'
+        
+        # Configure Git SSH port for cloning over SSH
+        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT:-2222}
+        gitlab_rails['time_zone'] = '${GITLAB_TIMEZONE:-UTC}'
+        
+        # Resource optimizations for homelab use
+        puma['worker_processes'] = 2
+        sidekiq['max_concurrency'] = 10
+        prometheus_monitoring['enable'] = false
+    ports:
+      - '${GITLAB_HTTP_PORT}:8080'
+      - '${GITLAB_SSH_PORT}:22'
+    volumes:
+      - '${DATA_PATH:-./data}/config:/etc/gitlab'
+      - '${DATA_PATH:-./data}/logs:/var/log/gitlab'
+      - '${DATA_PATH:-./data}/data:/var/opt/gitlab'
+    networks:
+      - shared-network
+      - gitlab-internal
+    shm_size: '256m'
+    healthcheck:
+      test: ["CMD-SHELL", "curl --failures http://localhost:8080/-/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    restart: always
+    depends_on:
+      gitlab:
+        condition: service_healthy
+    volumes:
+      - '${DATA_PATH:-./data}/runner-config:/etc/gitlab-runner'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      - gitlab-internal
+      - shared-network
+
+networks:
+  shared-network:
+    name: ${SHARED_NETWORK:-homelab-net}
+    external: true
+
+  gitlab-internal:
+    driver: bridge
