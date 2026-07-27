@@ -26,11 +26,11 @@ services:
       - '${DATA_PATH:-./data}/logs:/var/log/gitlab'
       - '${DATA_PATH:-./data}/data:/var/opt/gitlab'
     networks:
-      - shared-network
-      - gitlab-internal
+      - gitlab-net
     shm_size: '256m'
     healthcheck:
-      test: ["CMD-SHELL", "curl --failures http://localhost:8080/-/health || exit 1"]
+      # Changed to port 8080 to match GitLab's internal port
+      test: ["CMD-SHELL", "curl --fail http://localhost:8080/-/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -46,13 +46,8 @@ services:
       - '${DATA_PATH:-./data}/runner-config:/etc/gitlab-runner'
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
-      - gitlab-internal
-      - shared-network
+      - gitlab-net
 
 networks:
-  shared-network:
-    name: ${SHARED_NETWORK:-homelab-net}
-    external: true
-
-  gitlab-internal:
-    driver: bridge
+  gitlab-net:
+    driver: bridge # This creates a USER-DEFINED bridge, which supports aliases perfectly
