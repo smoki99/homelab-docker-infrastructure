@@ -29,6 +29,7 @@ services:
       - traefik.http.routers.traefik-dashboard.entrypoints=web
       - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
       - traefik.http.routers.traefik-dashboard.middlewares=entra-auth@docker
+      - traefik.http.services.traefik.loadbalancer.server.port=8080
 
       # TrueNAS Router & Service defined directly in compose!
       - traefik.http.routers.truenas.rule=Host(`truenas.vr-worlds.eu`)
