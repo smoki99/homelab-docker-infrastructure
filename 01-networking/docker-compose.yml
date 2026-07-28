@@ -73,3 +73,8 @@ services:
       - traefik.http.middlewares.entra-auth.forwardauth.address=http://oauth2-proxy:4180/
       - traefik.http.middlewares.entra-auth.forwardauth.trustForwardHeader=true
       - traefik.http.middlewares.entra-auth.forwardauth.authResponseHeaders=X-Auth-Request-User,X-Auth-Request-Email
+
+      - traefik.http.routers.traefik-dashboard.rule=Host(`traefik.vr-worlds.eu`)
+      - traefik.http.routers.traefik-dashboard.entrypoints=web
+      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+      - traefik.http.routers.traefik-dashboard.middlewares=entra-auth@docker
