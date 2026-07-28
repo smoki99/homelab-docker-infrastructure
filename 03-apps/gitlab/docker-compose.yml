@@ -47,7 +47,7 @@ services:
       - 'traefik.http.routers.gitlab.entrypoints=web'
       - 'traefik.http.routers.gitlab.service=gitlab'
       - 'traefik.http.routers.gitlab.middlewares=gitlab-https-headers@docker'
-      - 'traefik.http.services.gitlab.loadbalancer.server.port=8080'
+      - 'traefik.http.services.gitlab.loadbalancer.server.port=80'
       - 'traefik.http.middlewares.gitlab-https-headers.headers.customrequestheaders.X-Forwarded-Proto=https'
       - 'traefik.http.middlewares.gitlab-https-headers.headers.customrequestheaders.X-Forwarded-Ssl=on'
 
