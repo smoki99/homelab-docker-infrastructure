@@ -49,7 +49,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-      - traefik.http.routers.truenas.rule=Host(${TRUENAS_HOST})
+      - traefik.http.routers.truenas.rule=Host(`${TRUENAS_HOST}`)
       - traefik.http.routers.truenas.entrypoints=web
       - traefik.http.routers.truenas.middlewares=entra-auth@docker
       - traefik.http.services.truenas.loadbalancer.server.url=${TRUENAS_UPSTREAM_URL}
