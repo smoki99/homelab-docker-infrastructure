@@ -7,8 +7,7 @@ services:
     restart: always
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://${GITLAB_DOMAIN}'
-
+        external_url 'https://gitlab.vr-worlds.eu'
         nginx['listen_port'] = 80
         nginx['listen_https'] = false
         nginx['proxy_set_headers'] = {
@@ -17,9 +16,8 @@ services:
           "X-Forwarded-For" => "$proxy_add_x_forwarded_for",
           "Host" => "$http_host"
         }
-
-        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT:-2222}
-        gitlab_rails['time_zone'] = '${GITLAB_TIMEZONE:-UTC}'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        gitlab_rails['time_zone'] = 'UTC'
 
     # If you do NOT need SSH cloning, remove this whole ports block.
     # ports:
