@@ -13,7 +13,6 @@ services:
       - '--providers.docker=true'
       - '--providers.docker.exposedbydefault=false'
       - '--serversTransport.insecureSkipVerify=true'
-      - '--providers.file.watch=true'
       - '--entrypoints.web.address=:80'
       - '--api.dashboard=true'
       - '--api.insecure=true'
