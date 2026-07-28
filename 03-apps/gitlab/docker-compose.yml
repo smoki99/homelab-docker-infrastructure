@@ -7,19 +7,29 @@ services:
     restart: always
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        # Set external URL directly to IP and Port
-        external_url 'http://${SERVER_IP}:${GITLAB_HTTP_PORT}'
+        # Use domain URL (served behind Cloudflare/Traefik)
+        external_url 'https://${GITLAB_DOMAIN}'
         
-        # Configure Git SSH port for cloning over SSH
+        # Trust reverse proxy headers from Traefik container/network
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        nginx['proxy_set_headers'] = {
+          "X-Forwarded-Proto" => "https",
+          "X-Forwarded-Ssl" => "on",
+          "X-Forwarded-For" => "$proxy_add_x_forwarded_for",
+          "Host" => "$http_host"
+        }
+
+        # SSH clone port shown in UI
         gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT:-2222}
         gitlab_rails['time_zone'] = '${GITLAB_TIMEZONE:-UTC}'
-        
+
         # Resource optimizations for homelab use
         puma['worker_processes'] = 2
         sidekiq['max_concurrency'] = 10
         prometheus_monitoring['enable'] = false
     ports:
-      - '${GITLAB_HTTP_PORT}:8080'
+      # keep only SSH exposed on host; HTTP goes through Traefik network
       - '${GITLAB_SSH_PORT}:22'
     volumes:
       - '${DATA_PATH:-./data}/config:/etc/gitlab'
@@ -27,13 +37,20 @@ services:
       - '${DATA_PATH:-./data}/data:/var/opt/gitlab'
     networks:
       - gitlab-net
+      - proxy
     shm_size: '256m'
     healthcheck:
-      # Changed to port 8080 to match GitLab's internal port
       test: ["CMD-SHELL", "curl --fail http://localhost:8080/-/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.gitlab.rule=Host(`${GITLAB_DOMAIN}`)
+      - traefik.http.routers.gitlab.entrypoints=web
+      - traefik.http.services.gitlab.loadbalancer.server.port=8080
+      # IMPORTANT: no entra-auth middleware here (disabled auth gateway)
 
   gitlab-runner:
     image: gitlab/gitlab-runner:latest
@@ -50,4 +67,7 @@ services:
 
 networks:
   gitlab-net:
-    driver: bridge # This creates a USER-DEFINED bridge, which supports aliases perfectly
+    driver: bridge
+  proxy:
+    external: true
+    name: proxy
