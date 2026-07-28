@@ -7,10 +7,8 @@ services:
     restart: always
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        # Use domain URL (served behind Cloudflare/Traefik)
         external_url 'https://${GITLAB_DOMAIN}'
-        
-        # Trust reverse proxy headers from Traefik container/network
+
         nginx['listen_port'] = 80
         nginx['listen_https'] = false
         nginx['proxy_set_headers'] = {
@@ -20,47 +18,39 @@ services:
           "Host" => "$http_host"
         }
 
-        # SSH clone port shown in UI
         gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT:-2222}
         gitlab_rails['time_zone'] = '${GITLAB_TIMEZONE:-UTC}'
 
-        # Resource optimizations for homelab use
-        puma['worker_processes'] = 2
-        sidekiq['max_concurrency'] = 10
-        prometheus_monitoring['enable'] = false
-    ports:
-      # keep only SSH exposed on host; HTTP goes through Traefik network
-      - '${GITLAB_SSH_PORT}:22'
+    # If you do NOT need SSH cloning, remove this whole ports block.
+    # ports:
+    #  - '${GITLAB_SSH_PORT}:22'
+
     volumes:
-      - '${DATA_PATH:-./data}/config:/etc/gitlab'
-      - '${DATA_PATH:-./data}/logs:/var/log/gitlab'
-      - '${DATA_PATH:-./data}/data:/var/opt/gitlab'
+      - '${GITLAB_DATA_PATH}/config:/etc/gitlab'
+      - '${GITLAB_DATA_PATH}/logs:/var/log/gitlab'
+      - '${GITLAB_DATA_PATH}/data:/var/opt/gitlab'
+
     networks:
       - gitlab-net
       - proxy
+
     shm_size: '256m'
-    healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:8080/-/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
       - traefik.http.routers.gitlab.rule=Host(`${GITLAB_DOMAIN}`)
       - traefik.http.routers.gitlab.entrypoints=web
       - traefik.http.services.gitlab.loadbalancer.server.port=8080
-      # IMPORTANT: no entra-auth middleware here (disabled auth gateway)
 
   gitlab-runner:
     image: gitlab/gitlab-runner:latest
     container_name: gitlab-runner
     restart: always
     depends_on:
-      gitlab:
-        condition: service_healthy
+      - gitlab
     volumes:
-      - '${DATA_PATH:-./data}/runner-config:/etc/gitlab-runner'
+      - '${DATA_PATH}/runner-config:/etc/gitlab-runner'
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
       - gitlab-net
