@@ -23,7 +23,7 @@ services:
       - proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./dynamic:/etc/traefik/dynamic:ro
+      - ./dynamic/dynamic.yml:/etc/traefik/dynamic/dynamic.yml:ro
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
