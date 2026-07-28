@@ -49,6 +49,8 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
+      - traefik.http.middlewares.gitlab-https-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.gitlab-https-headers.headers.customrequestheaders.X-Forwarded-Ssl=on
       - traefik.http.routers.gitlab.rule=Host(`${GITLAB_DOMAIN}`)
       - traefik.http.routers.gitlab.entrypoints=web
       - traefik.http.services.gitlab.loadbalancer.server.port=8080
