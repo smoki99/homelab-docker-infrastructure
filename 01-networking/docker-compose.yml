@@ -12,7 +12,7 @@ services:
     command:
       - '--providers.docker=true'
       - '--providers.docker.exposedbydefault=false'
-      - '--providers.docker.insecureskipverify=true' 
+      - '--serversTransport.insecureSkipVerify=true'
       - '--providers.file.watch=true'
       - '--entrypoints.web.address=:80'
       - '--api.dashboard=true'
