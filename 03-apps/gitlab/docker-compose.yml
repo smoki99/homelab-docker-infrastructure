@@ -5,23 +5,29 @@ services:
     image: gitlab/gitlab-ce:${GITLAB_VERSION}
     container_name: gitlab
     restart: always
+    hostname: gitlab.vr-worlds.eu
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://gitlab.vr-worlds.eu'
+        external_url "https://gitlab.vr-worlds.eu"
+
         nginx['listen_port'] = 80
         nginx['listen_https'] = false
+        nginx['real_ip_trusted_addresses'] = ['0.0.0.0/0']
+        nginx['real_ip_header'] = 'X-Forwarded-For'
+        nginx['real_ip_recursive'] = 'on'
         nginx['proxy_set_headers'] = {
+          "Host" => "$$http_host",
+          "X-Real-IP" => "$$remote_addr",
+          "X-Forwarded-For" => "$$proxy_add_x_forwarded_for",
           "X-Forwarded-Proto" => "https",
-          "X-Forwarded-Ssl" => "on",
-          "X-Forwarded-For" => "$proxy_add_x_forwarded_for",
-          "Host" => "$http_host"
+          "X-Forwarded-Ssl" => "on"
         }
         gitlab_rails['gitlab_shell_ssh_port'] = 2222
         gitlab_rails['time_zone'] = 'UTC'
 
-    # If you do NOT need SSH cloning, remove this whole ports block.
-    # ports:
-    #  - '${GITLAB_SSH_PORT}:22'
+    # keep ONLY if you need SSH clone via git@
+    ports:
+      - '${GITLAB_SSH_PORT}:22'
 
     volumes:
       - '${GITLAB_DATA_PATH}/config:/etc/gitlab'
@@ -33,6 +39,12 @@ services:
       - proxy
 
     shm_size: '256m'
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8080/-/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
 
     labels:
       - traefik.enable=true
@@ -46,9 +58,10 @@ services:
     container_name: gitlab-runner
     restart: always
     depends_on:
-      - gitlab
+      gitlab:
+        condition: service_healthy
     volumes:
-      - '${DATA_PATH}/runner-config:/etc/gitlab-runner'
+      - '${GITLAB_DATA_PATH}/runner-config:/etc/gitlab-runner'
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
       - gitlab-net
