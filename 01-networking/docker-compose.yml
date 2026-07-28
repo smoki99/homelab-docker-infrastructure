@@ -23,7 +23,7 @@ services:
       - proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./dynamic/dynamic.yml:/etc/traefik/dynamic/dynamic.yml:ro
+      - ./dynamic:/etc/traefik/dynamic:ro
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
@@ -31,6 +31,13 @@ services:
       - traefik.http.routers.traefik-dashboard.entrypoints=web
       - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
       - traefik.http.routers.traefik-dashboard.middlewares=entra-auth@docker
+
+      # TrueNAS Router & Service defined directly in compose!
+      - traefik.http.routers.truenas.rule=Host(`truenas.vr-worlds.eu`)
+      - traefik.http.routers.truenas.entrypoints=web
+      - traefik.http.routers.truenas.middlewares=entra-auth@docker
+      - traefik.http.routers.truenas.service=truenas-svc
+      - traefik.http.services.truenas-svc.loadbalancer.server.url=http://192.168.178.134 
 
   cloudflared:
     container_name: cloudflared
