@@ -53,6 +53,7 @@ services:
       - traefik.http.routers.truenas.entrypoints=web
       - traefik.http.routers.truenas.middlewares=entra-auth@docker
       - traefik.http.services.truenas.loadbalancer.server.url=${TRUENAS_UPSTREAM_URL}
+      - traefik.http.services.truenas.loadbalancer.server.port=80
 
   # Microsoft Entra ID Authentication Gateway
   oauth2-proxy:
