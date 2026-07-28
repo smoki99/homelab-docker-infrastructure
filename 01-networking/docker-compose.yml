@@ -12,7 +12,7 @@ services:
     command:
       - '--providers.docker=true'
       - '--providers.docker.exposedbydefault=false'
-      - '--providers.file.filename=/etc/traefik/dynamic.yml'
+      - '--providers.file.directory=/etc/traefik/dynamic'
       - '--providers.file.watch=true'
       - '--entrypoints.web.address=:80'
       - '--api.dashboard=true'
@@ -23,7 +23,7 @@ services:
       - proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./dynamic:/etc/traefik/dynamic:ro
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
