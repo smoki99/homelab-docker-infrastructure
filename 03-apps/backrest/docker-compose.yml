@@ -32,4 +32,5 @@ services:
       - traefik.docker.network=proxy
       - traefik.http.routers.backrest.rule=Host(`backrest.vr-worlds.eu`)
       - traefik.http.routers.backrest.entrypoints=web
-      - traefik.http.services.backrest.loadbalancer.server.port=9898
+      - traefik.http.routers.backrest.service=backrest-svc
+      - traefik.http.services.backrest-svc.loadbalancer.server.port=9898
