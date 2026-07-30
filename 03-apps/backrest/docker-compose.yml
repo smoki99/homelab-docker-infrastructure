@@ -6,7 +6,7 @@ networks:
     name: proxy
 services:
   backrest:
-    image: goserverless/backrest:latest
+    image: ghcr.io/garethgeorge/backrest:latest
     container_name: backrest
     restart: unless-stopped
     ports:
