@@ -54,6 +54,12 @@ services:
       - traefik.http.routers.paperless.entrypoints=web
       - traefik.http.routers.paperless.middlewares=entra-auth@docker
       - traefik.http.services.paperless.loadbalancer.server.port=8000
+      # API router for Paperless
+      - traefik.http.routers.paperless-api.rule=Host(`paperless.vr-worlds.eu`) && (PathPrefix(`/api`) || PathPrefix(`/token`))
+      - traefik.http.routers.paperless-api.entrypoints=web
+      - traefik.http.routers.paperless-api.priority=100
+      - traefik.http.services.paperless-api.loadbalancer.server.port=8000
+
     environment:
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_DBHOST: db
