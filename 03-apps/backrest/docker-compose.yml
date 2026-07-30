@@ -1,0 +1,35 @@
+version: "3.8"
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+services:
+  backrest:
+    image: goserverless/backrest:latest
+    container_name: backrest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9898:9898"
+    environment:
+      - BACKREST_PORT=9898
+    volumes:
+      - /mnt/fast-data-pool-02/apps-fast/backrest/config:/config
+      - /mnt/fast-data-pool-02/apps-fast/backrest/cache:/cache
+
+      - /root/.ssh/hetzner_storagebox:/root/.ssh/hetzner_storagebox:ro
+
+      - /mnt/fast-data-pool-02/apps-fast/paperless:/data/paperless-nvme:ro
+      - /mnt/slow-data-pool-1/apps/paperless:/data/paperless-hdd:ro
+      
+      # Mount ALL TrueNAS Pools (Read-Only)
+      - /mnt/fast-data-pool-01:/data/fast-pool-01:ro
+      - /mnt/fast-data-pool-02:/data/fast-pool-02:ro
+      - /mnt/slow-data-pool-1:/data/slow-pool-1:ro
+
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.backrest.rule=Host(`backrest.vr-worlds.eu`)
+      - traefik.http.routers.backrest.entrypoints=web
+      - traefik.http.services.backrest.loadbalancer.server.port=9898
