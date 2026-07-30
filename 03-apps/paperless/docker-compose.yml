@@ -1,0 +1,70 @@
+version: "3.8"
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+  internal:
+    internal: true
+
+services:
+  broker:
+    image: docker.io/library/redis:7-alpine
+    container_name: paperless-redis
+    restart: unless-stopped
+    networks:
+      - internal
+    volumes:
+      - /mnt/fast-data-pool-02/apps-fast/paperless/redisdata:/data
+
+  db:
+    image: docker.io/library/postgres:16
+    container_name: paperless-db
+    restart: unless-stopped
+    networks:
+      - internal
+    volumes:
+      - /mnt/fast-data-pool-02/apps-fast/paperless/pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${PAPERLESS_DBNAME}
+      POSTGRES_USER: ${PAPERLESS_DBUSER}
+      POSTGRES_PASSWORD: ${PAPERLESS_DBPASS}
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless-webserver
+    restart: unless-stopped
+    networks:
+      - proxy
+      - internal
+    depends_on:
+      - db
+      - broker
+    ports:
+      - "8000:8000"
+    volumes:
+      - /mnt/fast-data-pool-02/apps-fast/paperless/data:/usr/src/paperless/data
+      - /mnt/slow-data-pool-1/apps/paperless/media:/usr/src/paperless/media
+      - /mnt/slow-data-pool-1/apps/paperless/export:/usr/src/paperless/export
+      - /mnt/slow-data-pool-1/apps/paperless/consume:/usr/src/paperless/consume
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.paperless.rule=Host(`paperless.vr-worlds.eu`)
+      - traefik.http.routers.paperless.entrypoints=web
+      - traefik.http.routers.paperless.middlewares=entra-auth@docker
+      - traefik.http.services.paperless.loadbalancer.server.port=8000
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBNAME: ${PAPERLESS_DBNAME}
+      PAPERLESS_DBUSER: ${PAPERLESS_DBUSER}
+      PAPERLESS_DBPASS: ${PAPERLESS_DBPASS}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      PAPERLESS_URL: ${PAPERLESS_URL}
+      PAPERLESS_TIME_ZONE: ${PAPERLESS_TIME_ZONE}
+      PAPERLESS_USE_X_FORWARD_HOST: "true"
+      PAPERLESS_USE_X_FORWARD_PORT: "true"
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: "https://paperless.vr-worlds.eu"
+      USERMAP_UID: 1000
+      USERMAP_GID: 1000
