@@ -51,18 +51,21 @@ services:
       - traefik.enable=true
       - traefik.docker.network=proxy
 
-      # 1. Web UI (Protected by Entra ID SSO)
+      # Define the target backend service ONCE
+      - traefik.http.services.paperless-svc.loadbalancer.server.port=8000
+
+      # 1. Main Web UI (Protected by Entra ID)
       - traefik.http.routers.paperless.rule=Host(`paperless.vr-worlds.eu`)
       - traefik.http.routers.paperless.entrypoints=web
       - traefik.http.routers.paperless.middlewares=entra-auth@docker
       - traefik.http.routers.paperless.priority=1
-      - traefik.http.services.paperless.loadbalancer.server.port=8000
+      - traefik.http.routers.paperless.service=paperless-svc
 
-      # 2. Mobile App API (Bypasses Entra ID -> Paperless authenticates the app directly)
+      # 2. Mobile App API (Bypasses Entra ID)
       - traefik.http.routers.paperless-api.rule=Host(`paperless.vr-worlds.eu`) && (PathPrefix(`/api`) || PathPrefix(`/token`))
       - traefik.http.routers.paperless-api.entrypoints=web
       - traefik.http.routers.paperless-api.priority=100
-      - traefik.http.services.paperless-api.loadbalancer.server.port=8000
+      - traefik.http.routers.paperless-api.service=paperless-svc
 
     environment:
       PAPERLESS_REDIS: redis://broker:6379
