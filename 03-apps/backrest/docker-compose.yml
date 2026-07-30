@@ -9,6 +9,8 @@ services:
     image: ghcr.io/garethgeorge/backrest:latest
     container_name: backrest
     restart: unless-stopped
+    networks:
+      - proxy
     ports:
       - "127.0.0.1:9898:9898"
     environment:
