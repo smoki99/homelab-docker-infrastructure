@@ -50,11 +50,15 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
+
+      # 1. Web UI (Protected by Entra ID SSO)
       - traefik.http.routers.paperless.rule=Host(`paperless.vr-worlds.eu`)
       - traefik.http.routers.paperless.entrypoints=web
       - traefik.http.routers.paperless.middlewares=entra-auth@docker
+      - traefik.http.routers.paperless.priority=1
       - traefik.http.services.paperless.loadbalancer.server.port=8000
-      # API router for Paperless
+
+      # 2. Mobile App API (Bypasses Entra ID -> Paperless authenticates the app directly)
       - traefik.http.routers.paperless-api.rule=Host(`paperless.vr-worlds.eu`) && (PathPrefix(`/api`) || PathPrefix(`/token`))
       - traefik.http.routers.paperless-api.entrypoints=web
       - traefik.http.routers.paperless-api.priority=100
