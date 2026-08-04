@@ -30,6 +30,27 @@ services:
       POSTGRES_USER: ${PAPERLESS_DBUSER}
       POSTGRES_PASSWORD: ${PAPERLESS_DBPASS}
 
+  db-backup:
+    image: prodrigestivill/postgres-backup-local:15
+    container_name: paperless-db-backup
+    restart: unless-stopped
+    networks:
+      - internal
+    depends_on:
+      - db
+    volumes:
+      - /mnt/fast-data-pool-02/apps-fast/paperless/db-backups:/backups
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${PAPERLESS_DBNAME}
+      POSTGRES_USER: ${PAPERLESS_DBUSER}
+      POSTGRES_PASSWORD: ${PAPERLESS_DBPASS}
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+      POSTGRES_EXTRA_OPTS: "-Z6"
+
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     container_name: paperless-webserver
