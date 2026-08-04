@@ -51,6 +51,12 @@ services:
       BACKUP_KEEP_WEEKS: 4
       BACKUP_KEEP_MONTHS: 6
       POSTGRES_EXTRA_OPTS: "-Z6"
+    healthcheck: 
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 30s 
+      timeout: 5s   
+      retries: 3    
+      start_period: 10s               
 
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
