@@ -11,7 +11,7 @@ services:
     container_name: obsidian
     restart: unless-stopped
     
-    shm_size: "2gb"
+    shm_size: "4gb"
     
     security_opt:
       - seccomp:unconfined
