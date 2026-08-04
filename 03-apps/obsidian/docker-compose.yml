@@ -33,7 +33,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-      - traefik.http.routers.obsidian.rule=Host(`${OBSIDIAN_DOMAIN}`)
+      - traefik.http.routers.obsidian.rule=Host(`obsidian.vr-worlds.eu`)
       - traefik.http.routers.obsidian.entrypoints=web
       - traefik.http.services.obsidian.loadbalancer.server.port=3000
       - traefik.http.routers.obsidian.middlewares=entra-auth@docker
