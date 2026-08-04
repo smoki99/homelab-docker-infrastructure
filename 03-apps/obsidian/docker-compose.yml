@@ -1,0 +1,40 @@
+version: "3.8"
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+
+services:
+  obsidian:
+    image: lscr.io/linuxserver/obsidian:latest
+    container_name: obsidian
+    restart: unless-stopped
+    
+    shm_size: "2gb"
+    
+    security_opt:
+      - seccomp:unconfined
+
+    environment:
+      - PUID=${OBSIDIAN_PUID:-1000}
+      - PGID=${OBSIDIAN_PGID:-1000}
+      - TZ=${OBSIDIAN_TZ:-Europe/Berlin}
+      - CUSTOM_USER=
+      - PASSWORD=
+
+    volumes:
+      - ${OBSIDIAN_CONFIG_PATH}:/config
+      - ${OBSIDIAN_VAULT_PATH}:/vaults
+
+    networks:
+      - proxy
+
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.obsidian.rule=Host(`${OBSIDIAN_DOMAIN}`)
+      - traefik.http.routers.obsidian.entrypoints=web
+      - traefik.http.services.obsidian.loadbalancer.server.port=3000
+      - traefik.http.routers.obsidian.middlewares=entra-auth@docker
+      
