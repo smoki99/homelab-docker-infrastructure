@@ -1,0 +1,24 @@
+version: "3.8"
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+
+services:
+  silverbullet:
+    image: zefhemel/silverbullet:latest
+    container_name: silverbullet
+    restart: unless-stopped
+    user: "1000:1000"
+    volumes:
+      - ${OBSIDIAN_VAULT_PATH}:/space
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.silverbullet.rule=Host(`sb.vr-worlds.eu`)
+      - traefik.http.routers.silverbullet.entrypoints=web
+      - traefik.http.services.silverbullet.loadbalancer.server.port=3000
+      - traefik.http.routers.silverbullet.middlewares=entra-auth@docker
