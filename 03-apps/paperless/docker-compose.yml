@@ -58,6 +58,24 @@ services:
       retries: 3    
       start_period: 10s               
 
+  gotenberg:
+    image: docker.io/gotenberg/gotenberg:8.7
+    container_name: paperless-gotenberg
+    restart: unless-stopped
+    networks:
+      - internal
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+
+  tika:
+    image: ghcr.io/paperless-ngx/tika:latest
+    container_name: paperless-tika
+    restart: unless-stopped
+    networks:
+      - internal
+
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     container_name: paperless-webserver
