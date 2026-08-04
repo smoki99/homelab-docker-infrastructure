@@ -83,6 +83,8 @@ services:
     networks:
       - proxy
       - internal
+      - tika
+      - gotenberg
     depends_on:
       - db
       - broker
