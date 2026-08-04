@@ -70,11 +70,11 @@ services:
       - "--chromium-allow-list=file:///tmp/.*"
 
   tika:
-    image: ghcr.io/paperless-ngx/tika:latest
-    container_name: paperless-tika
-    restart: unless-stopped
-    networks:
-      - internal
+      image: docker.io/apache/tika:latest
+      container_name: paperless-tika
+      restart: unless-stopped
+      networks:
+        - internal
 
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
