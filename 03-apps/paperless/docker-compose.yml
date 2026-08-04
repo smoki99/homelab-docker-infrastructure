@@ -126,5 +126,8 @@ services:
       PAPERLESS_USE_X_FORWARD_HOST: "true"
       PAPERLESS_USE_X_FORWARD_PORT: "true"
       PAPERLESS_CSRF_TRUSTED_ORIGINS: "https://paperless.vr-worlds.eu"
+      PAPERLESS_TIKA_ENABLED: "1"
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: "http://gotenberg:3000"
+      PAPERLESS_TIKA_ENDPOINT: "http://tika:9998"
       USERMAP_UID: 1000
       USERMAP_GID: 1000
