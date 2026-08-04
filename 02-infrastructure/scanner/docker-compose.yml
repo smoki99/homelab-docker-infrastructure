@@ -13,10 +13,11 @@ services:
     environment:
       - PUID=1000 
       - PGID=100  
-      - AIRSCAN_DEVICES=HP_Laser_MFP:"http://192.168.178.121/eSCL/" 
+      - AIRSCAN_DEVICES=HP_Laser_MFP:"http://192.168.178.121/eSCL/"
+      - SANESCAN_FORMAT=pdf 
     volumes:
       - /var/run/dbus:/var/run/dbus
-      - /mnt/slow-data-pool-1/apps/paperless/consume:/app/data/output 
+      - /mnt/slow-data-pool-1/apps/paperless/consume:/usr/lib/scanservjs/data/output
     restart: unless-stopped
 
     networks:
