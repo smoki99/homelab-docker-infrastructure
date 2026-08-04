@@ -16,6 +16,9 @@ services:
     security_opt:
       - seccomp:unconfined
 
+    devices:
+      - /dev/dri:/dev/dri
+      
     environment:
       - PUID=${OBSIDIAN_PUID:-1000}
       - PGID=${OBSIDIAN_PGID:-1000}
