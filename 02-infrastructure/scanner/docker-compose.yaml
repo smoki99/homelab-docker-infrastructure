@@ -1,0 +1,34 @@
+version: "3.8"
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+
+services:
+  scanservjs:
+    image: sbs20/scanservjs:latest
+    container_name: scanservjs
+    privileged: true
+    environment:
+      - PUID=1000 
+      - PGID=100  
+      - AIRSCAN_DEVICES=HP_Laser_MFP:"http://192.168.178.121/eSCL/" 
+    volumes:
+      - /var/run/dbus:/var/run/dbus
+      - /mnt/slow-data-pool-1/apps/paperless/consume:/app/data/output 
+    restart: unless-stopped
+
+    networks:
+      - proxy
+
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'traefik.http.routers.scanservjs.rule=Host(`scan.vr-worlds.eu`)'
+      - 'traefik.http.routers.scanservjs.entrypoints=web'
+      - 'traefik.http.routers.scanservjs.service=scanservjs'
+      - 'traefik.http.routers.scanservjs.middlewares=scanservjs-https-headers@docker'
+      - 'traefik.http.services.scanservjs.loadbalancer.server.port=8080'
+      - 'traefik.http.middlewares.scanservjs-https-headers.headers.customrequestheaders.X-Forwarded-Proto=https'
+      - 'traefik.http.middlewares.scanservjs-https-headers.headers.customrequestheaders.X-Forwarded-Ssl=on'
