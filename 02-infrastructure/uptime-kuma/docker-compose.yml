@@ -1,4 +1,4 @@
-name: uptime-kuma-stack
+name: uptime-kuma
 
 networks:
   proxy:
