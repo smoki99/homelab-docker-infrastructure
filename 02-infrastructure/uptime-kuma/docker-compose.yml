@@ -14,7 +14,6 @@ services:
       - proxy
     volumes:
       - ${UPTIME_KUMA_DATASET}:/app/data
-      # Optional: Gives Uptime Kuma access to your Docker socket to monitor host containers
       - /var/run/docker.sock:/var/run/docker.sock:ro 
     labels:
       - traefik.enable=true
