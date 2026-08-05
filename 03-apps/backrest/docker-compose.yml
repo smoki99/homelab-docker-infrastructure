@@ -27,7 +27,13 @@ services:
       # Mount ALL TrueNAS Pools (Read-Only)
       - /mnt/fast-data-pool-01:/data/fast-pool-01:ro
       - /mnt/fast-data-pool-02:/data/fast-pool-02:ro
-      - /mnt/slow-data-pool-1:/data/slow-pool-1:ro
+
+      - type: bind
+        source: /mnt/slow-data-pool-1
+        target: /data/slow-pool-1
+        read_only: true
+        bind:
+          propagation: rslave
 
     labels:
       - traefik.enable=true
