@@ -1,0 +1,27 @@
+version: "3.8"
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+
+services:
+  mermaid:
+    image: ghcr.io/mermaid-js/mermaid-live-editor:latest
+    container_name: mermaid
+    restart: unless-stopped
+    networks:
+      - proxy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.mermaid.rule=Host(`mermaid.vr-worlds.eu`)
+      - traefik.http.routers.mermaid.entrypoints=web
+      - traefik.http.services.mermaid.loadbalancer.server.port=8080
+      - traefik.http.routers.mermaid.middlewares=entra-auth@docker
