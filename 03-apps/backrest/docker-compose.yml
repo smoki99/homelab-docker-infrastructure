@@ -25,8 +25,19 @@ services:
       - /mnt/slow-data-pool-1/apps/paperless:/data/paperless-hdd:ro
       
       # Mount ALL TrueNAS Pools (Read-Only)
-      - /mnt/fast-data-pool-01:/data/fast-pool-01:ro
-      - /mnt/fast-data-pool-02:/data/fast-pool-02:ro
+      - type: bind
+        source: /mnt/fast-data-pool-01
+        target: /data/fast-pool-01
+        read_only: true
+        bind:
+          propagation: rslave
+
+      - type: bind
+        source: /mnt/fast-data-pool-02
+        target: /data/fast-pool-02
+        read_only: true
+        bind:
+          propagation: rslave
 
       - type: bind
         source: /mnt/slow-data-pool-1
