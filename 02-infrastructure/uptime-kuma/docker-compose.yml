@@ -1,0 +1,25 @@
+name: uptime-kuma-stack
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+
+services:
+  app:
+    container_name: uptime-kuma
+    image: louislam/uptime-kuma:2.5.0
+    restart: always
+    networks:
+      - proxy
+    volumes:
+      - ${UPTIME_KUMA_DATASET}:/app/data
+      # Optional: Gives Uptime Kuma access to your Docker socket to monitor host containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.uptime-kuma.rule=Host(`uptime-kuma.vr-worlds.eu`) || Host(`uptime-kuma.vr-worlds.de`)
+      - traefik.http.routers.uptime-kuma.entrypoints=web
+      - traefik.http.services.uptime-kuma.loadbalancer.server.port=3001
+      - traefik.http.routers.uptime-kuma.middlewares=entra-auth@docker
