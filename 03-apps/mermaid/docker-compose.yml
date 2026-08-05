@@ -6,7 +6,6 @@ networks:
     name: proxy
 
 services:
-  # The frontend editor interface
   mermaid:
     image: ghcr.io/mermaid-js/mermaid-live-editor:latest
     container_name: mermaid
@@ -18,8 +17,7 @@ services:
       - MERMAID_ANALYTICS_URL=
       - MERMAID_DOMAIN=
       - MERMAID_RENDERER_URL=
-      # Point to your local private kroki container on the docker network
-      - MERMAID_KROKI_RENDERER_URL=http://mermaid-renderer:8000
+      - MERMAID_KROKI_RENDERER_URL=http://kroki-renderer:8000
     logging:
       driver: "json-file"
       options:
@@ -33,10 +31,31 @@ services:
       - traefik.http.services.mermaid.loadbalancer.server.port=8080
       - traefik.http.routers.mermaid.middlewares=entra-auth@docker
 
-  # The private internal rendering engine (Kroki)
-  mermaid-renderer:
+  plantuml-frontend:
+    image: hakenadu/plantuml-editor:latest
+    container_name: plantuml-frontend
+    restart: unless-stopped
+    networks:
+      - proxy
+    environment:
+      - BASE_URL=http://kroki-renderer:8000/plantuml
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.plantuml.rule=Host(`plantuml.vr-worlds.eu`)
+      - traefik.http.routers.plantuml.entrypoints=web
+      - traefik.http.services.plantuml.loadbalancer.server.port=8080
+      - traefik.http.routers.plantuml.middlewares=entra-auth@docker
+
+  kroki-renderer:
     image: yuzutech/kroki:latest
-    container_name: mermaid-renderer
+    container_name: kroki-renderer
+    # Highlight-end
     restart: unless-stopped
     environment:
       - KROKI_SAFE_MODE=unsafe
