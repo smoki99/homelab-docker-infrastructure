@@ -18,7 +18,27 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-      - traefik.http.routers.uptime-kuma.rule=Host(`uptime-kuma.vr-worlds.eu`) || Host(`uptime-kuma.vr-worlds.de`)
-      - traefik.http.routers.uptime-kuma.entrypoints=web
-      - traefik.http.services.uptime-kuma.loadbalancer.server.port=3001
-      - traefik.http.routers.uptime-kuma.middlewares=entra-auth@docker
+
+      # ------------------------------------------------------------------------
+      # 1. PUBLIC ROUTER (No Entra ID Auth)
+      # Bypasses authentication for status pages, assets, badges & public APIs
+      # ------------------------------------------------------------------------
+      - traefik.http.routers.uptime-kuma-public.rule=(Host(`uptime-kuma.vr-worlds.eu`) || Host(`uptime-kuma.vr-worlds.de`)) && (PathPrefix(`/status`) || PathPrefix(`/assets`) || PathPrefix(`/api/status-page`) || PathPrefix(`/api/push`) || PathPrefix(`/api/badge`) || PathPrefix(`/upload`) || Path(`/icon.svg`) || Path(`/apple-touch-icon.png`))
+      - traefik.http.routers.uptime-kuma-public.entrypoints=web
+      - traefik.http.routers.uptime-kuma-public.priority=100
+      - traefik.http.routers.uptime-kuma-public.service=uptime-kuma-svc
+
+      # ------------------------------------------------------------------------
+      # 2. PRIVATE ROUTER (Entra ID Enforced)
+      # Blocks all other paths (admin dashboard, settings, internal APIs)
+      # ------------------------------------------------------------------------
+      - traefik.http.routers.uptime-kuma-private.rule=Host(`uptime-kuma.vr-worlds.eu`) || Host(`uptime-kuma.vr-worlds.de`)
+      - traefik.http.routers.uptime-kuma-private.entrypoints=web
+      - traefik.http.routers.uptime-kuma-private.priority=10
+      - traefik.http.routers.uptime-kuma-private.middlewares=entra-auth@docker
+      - traefik.http.routers.uptime-kuma-private.service=uptime-kuma-svc
+
+      # ------------------------------------------------------------------------
+      # LOADBALANCER SERVICE (Shared by both routers)
+      # ------------------------------------------------------------------------
+      - traefik.http.services.uptime-kuma-svc.loadbalancer.server.port=3001
