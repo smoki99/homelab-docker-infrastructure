@@ -6,18 +6,25 @@ networks:
     name: proxy
 
 services:
+  # The frontend editor interface
   mermaid:
     image: ghcr.io/mermaid-js/mermaid-live-editor:latest
     container_name: mermaid
     restart: unless-stopped
     networks:
       - proxy
+    environment:
+      - MERMAID_IS_ENABLED_MERMAID_CHART_LINKS=false
+      - MERMAID_ANALYTICS_URL=
+      - MERMAID_DOMAIN=
+      - MERMAID_RENDERER_URL=
+      # Point to your local private kroki container on the docker network
+      - MERMAID_KROKI_RENDERER_URL=http://mermaid-renderer:8000
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
@@ -25,3 +32,18 @@ services:
       - traefik.http.routers.mermaid.entrypoints=web
       - traefik.http.services.mermaid.loadbalancer.server.port=8080
       - traefik.http.routers.mermaid.middlewares=entra-auth@docker
+
+  # The private internal rendering engine (Kroki)
+  mermaid-renderer:
+    image: yuzutech/kroki:latest
+    container_name: mermaid-renderer
+    restart: unless-stopped
+    environment:
+      - KROKI_SAFE_MODE=unsafe
+    networks:
+      - proxy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
