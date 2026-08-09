@@ -46,7 +46,7 @@ services:
       - MYSQL_DATABASE=${NEXTCLOUD_APP_MYSQL_DATABASE}
       - MYSQL_USER=${NEXTCLOUD_APP_MYSQL_USER}
       - MYSQL_PASSWORD=${NEXTCLOUD_APP_MYSQL_PASSWORD}
-      - NC_auth.bruteforce.protection.enabled=false
+      - TRUSTED_PROXIES=172.16.0.0/12
     networks:
       - internal
     volumes:
