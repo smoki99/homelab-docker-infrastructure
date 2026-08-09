@@ -49,10 +49,10 @@ services:
     container_name: nextcloud-collabora
     image: collabora/code:latest
     restart: always
+    cap_add:
+      - SYS_ADMIN
     environment:
-      # Whitelist your Nextcloud domains (Regex format)
       - aliasgroup1=https://nextcloud\.vr-worlds\.(eu|de):443
-      # Tell Collabora that Traefik handles SSL termination
       - extra_params=--o:ssl.enable=false --o:ssl.termination=true
     networks:
       - proxy
