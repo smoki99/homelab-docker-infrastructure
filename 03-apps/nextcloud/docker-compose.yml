@@ -12,6 +12,11 @@ services:
     container_name: nextcloud-app
     image: nextcloud:latest
     restart: always
+
+    cap_add:
+      - SYS_ADMIN
+      - MKNOD
+
     environment:
       - MYSQL_HOST=db
       - MYSQL_DATABASE=${NEXTCLOUD_APP_MYSQL_DATABASE}
