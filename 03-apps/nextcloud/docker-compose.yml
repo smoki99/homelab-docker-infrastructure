@@ -41,9 +41,7 @@ services:
       - traefik.http.routers.nextcloud.rule=Host(`nextcloud.vr-worlds.eu`) || Host(`nextcloud.vr-worlds.de`)
       - traefik.http.routers.nextcloud.entrypoints=web
       - traefik.http.services.nextcloud.loadbalancer.server.port=80
-
-    # ENFORCE MICROSOFT ENTRA ID LOGIN:
-      - traefik.http.routers.nextcloud.middlewares=entra-auth@docker
+      # - traefik.http.routers.nextcloud.middlewares=entra-auth@docker
 
   collabora:
     container_name: nextcloud-collabora
