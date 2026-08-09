@@ -24,6 +24,9 @@ services:
       - MYSQL_PASSWORD=${NEXTCLOUD_APP_MYSQL_PASSWORD}
       - REDIS_HOST=redis
       - TRUSTED_PROXIES=172.16.0.0/12
+      - NC_richdocuments_wopi_url=https://office.vr-worlds.eu
+      - OVERWRITEPROTOCOL=https
+      - OVERWRITEHOST=nextcloud.vr-worlds.eu
     depends_on:
       - db
       - redis
@@ -41,6 +44,24 @@ services:
 
     # ENFORCE MICROSOFT ENTRA ID LOGIN:
       - traefik.http.routers.nextcloud.middlewares=entra-auth@docker
+
+  collabora:
+    container_name: nextcloud-collabora
+    image: collabora/code:latest
+    restart: always
+    environment:
+      # Whitelist your Nextcloud domains (Regex format)
+      - aliasgroup1=https://nextcloud\.vr-worlds\.(eu|de):443
+      # Tell Collabora that Traefik handles SSL termination
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.collabora.rule=Host(`office.vr-worlds.eu`) || Host(`office.vr-worlds.de`)
+      - traefik.http.routers.collabora.entrypoints=web
+      - traefik.http.services.collabora.loadbalancer.server.port=9980
 
   db:
     container_name: nextcloud-db
