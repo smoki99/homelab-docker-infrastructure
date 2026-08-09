@@ -18,6 +18,7 @@ services:
       - MYSQL_USER=${NEXTCLOUD_APP_MYSQL_USER}
       - MYSQL_PASSWORD=${NEXTCLOUD_APP_MYSQL_PASSWORD}
       - REDIS_HOST=redis
+      - TRUSTED_PROXIES=172.16.0.0/12
     depends_on:
       - db
       - redis
@@ -46,7 +47,6 @@ services:
       - MYSQL_DATABASE=${NEXTCLOUD_APP_MYSQL_DATABASE}
       - MYSQL_USER=${NEXTCLOUD_APP_MYSQL_USER}
       - MYSQL_PASSWORD=${NEXTCLOUD_APP_MYSQL_PASSWORD}
-      - TRUSTED_PROXIES=172.16.0.0/12
     networks:
       - internal
     volumes:
