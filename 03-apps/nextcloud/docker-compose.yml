@@ -24,7 +24,6 @@ services:
       - MYSQL_PASSWORD=${NEXTCLOUD_APP_MYSQL_PASSWORD}
       - REDIS_HOST=redis
       - TRUSTED_PROXIES=172.16.0.0/12
-      - NC_richdocuments_wopi_url=https://office.vr-worlds.eu
       - OVERWRITEPROTOCOL=https
       - OVERWRITEHOST=nextcloud.vr-worlds.eu
       - PHP_MEMORY_LIMIT=2048M
@@ -52,6 +51,8 @@ services:
     environment:
       - JWT_ENABLED=true
       - JWT_SECRET=${ONLYOFFICE_JWT_SECRET}
+      - USE_UNAUTHORIZED_STORAGE=true
+      - FORCE_SSL=true   
     networks:
       - proxy
     labels:
