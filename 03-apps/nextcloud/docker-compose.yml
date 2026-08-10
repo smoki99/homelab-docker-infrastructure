@@ -89,7 +89,7 @@ services:
       - internal
   db-backup:
     container_name: nextcloud-db-backup
-    image: prodigy74/mariadb-backup-cron:latest
+    image: fradelg/mysql-cron-backup:latest
     restart: always
     environment:
       - MYSQL_HOST=db
@@ -98,7 +98,7 @@ services:
       - MYSQL_DATABASE=${NEXTCLOUD_APP_MYSQL_DATABASE}
       - CRON_SCHEDULE=0 */12 * * * 
       - BACKUP_NUM_KEEP=25
-      - COMPRESSION=gzip
+      - GZIP_LEVEL=6  
     volumes:
       - ${NEXTCLOUD_APP_DATASET_DB_BACKUP}:/backup # Change to your actual host backup path
     networks:
