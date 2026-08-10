@@ -37,7 +37,7 @@ services:
     volumes:
       - ${NEXTCLOUD_APP_DATASET_HTML}:/var/www/html
       - ${NEXTCLOUD_PAPERLESS_ARCHIVE}:/var/paperless/archive:ro
-      - ${NEXTCLOUD_PAPERLESS_CONSUME}:/var/paperless/consume:rw
+      - ${NEXTCLOUD_PAPERLESS_CONSUME}:/var/paperless/consume
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
