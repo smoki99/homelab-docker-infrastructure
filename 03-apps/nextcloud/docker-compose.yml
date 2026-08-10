@@ -45,25 +45,21 @@ services:
       - traefik.http.routers.nextcloud.entrypoints=web
       - traefik.http.services.nextcloud.loadbalancer.server.port=80
 
-  collabora:
-    container_name: nextcloud-collabora
-    image: collabora/code:latest
+  onlyoffice:
+    container_name: nextcloud-onlyoffice
+    image: onlyoffice/documentserver:latest
     restart: always
-    cap_add:
-      - SYS_ADMIN
-    tmpfs:
-      - /tmp:exec,size=1G
     environment:
-      - aliasgroup1=https://nextcloud\.vr-worlds\.(eu|de):443
-      - extra_params=--o:ssl.enable=false --o:ssl.termination=true
+      - JWT_ENABLED=true
+      - JWT_SECRET=${ONLYOFFICE_JWT_SECRET}
     networks:
       - proxy
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-      - traefik.http.routers.collabora.rule=Host(`office.vr-worlds.eu`) || Host(`office.vr-worlds.de`)
-      - traefik.http.routers.collabora.entrypoints=web
-      - traefik.http.services.collabora.loadbalancer.server.port=9980
+      - traefik.http.routers.onlyoffice.rule=Host(`office.vr-worlds.eu`) || Host(`office.vr-worlds.de`)
+      - traefik.http.routers.onlyoffice.entrypoints=web
+      - traefik.http.services.onlyoffice.loadbalancer.server.port=80
 
   db:
     container_name: nextcloud-db

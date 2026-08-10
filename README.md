@@ -30,3 +30,7 @@ graph TD
             DB ---|DB Dataset| DBData[/mnt/.../nextcloud_db\]
         end
     end
+
+
+ONLYOFFICE_JWT_SECRET
+Generate with openssl rand -hex 32
