@@ -133,4 +133,3 @@ services:
       USERMAP_GID: 1000
       PAPERLESS_FILENAME_FORMAT: "{{ correspondent }}/{{ created_year }}/{{ title }}"
       PAPERLESS_FILENAME_FORMAT_REMOVE_NONE: "true" 
-      PAPERLESS_CONSUMPTION_DIR_CHECK_INOTIFY: "false"
