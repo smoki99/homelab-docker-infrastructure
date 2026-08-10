@@ -62,6 +62,10 @@ services:
       - traefik.http.routers.onlyoffice.entrypoints=web
       - traefik.http.services.onlyoffice.loadbalancer.server.port=80
 
+      # FIX: Force Traefik to explicitly tell ONLYOFFICE that the frontend connection is secure HTTPS
+      - traefik.http.routers.onlyoffice.middlewares=onlyoffice-headers
+      - traefik.http.middlewares.onlyoffice-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.onlyoffice-headers.headers.customresponseheaders.X-Forwarded-Proto=https
   db:
     container_name: nextcloud-db
     image: mariadb:10.11
