@@ -63,6 +63,7 @@ services:
       - traefik.http.routers.collabora.rule=Host(`office.vr-worlds.eu`) || Host(`office.vr-worlds.de`)
       - traefik.http.routers.collabora.entrypoints=web
       - traefik.http.services.collabora.loadbalancer.server.port=9980
+      - traefik.http.routers.collabora.middlewares=entra-auth@docker
 
   db:
     container_name: nextcloud-db
