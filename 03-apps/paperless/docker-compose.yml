@@ -131,4 +131,4 @@ services:
       PAPERLESS_TIKA_ENDPOINT: "http://tika:9998"
       USERMAP_UID: 1000
       USERMAP_GID: 1000
-      PAPERLESS_FILENAME_FORMAT: "{correspondent}/{created_year}/{title}"
+      PAPERLESS_FILENAME_FORMAT: "{{ correspondent }}/{{ created_year }}/{{ title }}"
