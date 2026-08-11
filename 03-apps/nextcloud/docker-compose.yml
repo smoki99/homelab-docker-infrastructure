@@ -44,9 +44,9 @@ services:
       - traefik.http.routers.nextcloud.entrypoints=web
       - traefik.http.services.nextcloud.loadbalancer.server.port=80
 
-  onlyoffice:
-    container_name: nextcloud-onlyoffice
-    image: onlyoffice/documentserver:latest
+  eurooffice:
+    container_name: nextcloud-eurooffice
+    image: ghcr.io/euro-office/documentserver:latest
     restart: always
     environment:
       - JWT_ENABLED=true
@@ -58,14 +58,14 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-      - traefik.http.routers.onlyoffice.rule=Host(`office.vr-worlds.eu`) || Host(`office.vr-worlds.de`)
-      - traefik.http.routers.onlyoffice.entrypoints=web
-      - traefik.http.services.onlyoffice.loadbalancer.server.port=80
+      - traefik.http.routers.eurooffice.rule=Host(`office.vr-worlds.eu`) || Host(`office.vr-worlds.de`)
+      - traefik.http.routers.eurooffice.entrypoints=web
+      - traefik.http.services.eurooffice.loadbalancer.server.port=80
 
-      # FIX: Force Traefik to explicitly tell ONLYOFFICE that the frontend connection is secure HTTPS
-      - traefik.http.routers.onlyoffice.middlewares=onlyoffice-headers
-      - traefik.http.middlewares.onlyoffice-headers.headers.customrequestheaders.X-Forwarded-Proto=https
-      - traefik.http.middlewares.onlyoffice-headers.headers.customresponseheaders.X-Forwarded-Proto=https
+      # FIX: Force Traefik to explicitly tell EuroOffice that the frontend connection is secure HTTPS
+      - traefik.http.routers.eurooffice.middlewares=eurooffice-headers
+      - traefik.http.middlewares.eurooffice-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.eurooffice-headers.headers.customresponseheaders.X-Forwarded-Proto=https
   db:
     container_name: nextcloud-db
     image: mariadb:10.11
@@ -100,7 +100,7 @@ services:
       - BACKUP_NUM_KEEP=25
       - GZIP_LEVEL=6  
     volumes:
-      - ${NEXTCLOUD_APP_DATASET_DB_BACKUP}:/backup # Change to your actual host backup path
+      - ${NEXTCLOUD_APP_DATASET_DB_BACKUP}:/backup
     networks:
       - internal
     depends_on:
