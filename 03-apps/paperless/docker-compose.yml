@@ -114,6 +114,12 @@ services:
       - traefik.http.routers.paperless-api.service=paperless-api-svc
       - traefik.http.services.paperless-api-svc.loadbalancer.server.port=8000
 
+      # Ofelia Konfiguration:
+      - "ofelia.enabled=true"
+      - "ofelia.job-exec.paperless-export.schedule=0 0 3 * * *"
+      # Export ohne Löschung um GoBD Konform Daten für immer zu halten:. Der Export geht unveränderlich nach Hetzner
+      - "ofelia.job-exec.paperless-export.command=document_exporter /usr/src/paperless/export -c"
+
     environment:
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_DBHOST: db
@@ -133,3 +139,13 @@ services:
       USERMAP_GID: 1000
       PAPERLESS_FILENAME_FORMAT: "{{ correspondent }}/{{ created_year }}/{{ title }}"
       PAPERLESS_FILENAME_FORMAT_REMOVE_NONE: "true" 
+
+  ofelia:
+    image: mcuadros/ofelia:latest
+    container_name: paperless-scheduler
+    restart: unless-stopped
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - webserver
