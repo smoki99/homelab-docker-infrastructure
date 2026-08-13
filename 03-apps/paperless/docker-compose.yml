@@ -116,7 +116,8 @@ services:
 
       # Ofelia Konfiguration:
       - "ofelia.enabled=true"
-      - "ofelia.job-exec.paperless-export.schedule=0 0 3 * * *"
+      - "ofelia.job-exec.paperless-export.schedule=@every 1m"
+      # - "ofelia.job-exec.paperless-export.schedule=0 0 3 * * *"
       # Export ohne Löschung um GoBD Konform Daten für immer zu halten:. Der Export geht unveränderlich nach Hetzner
       - "ofelia.job-exec.paperless-export.command=document_exporter /usr/src/paperless/export -c"
 
