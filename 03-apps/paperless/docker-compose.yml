@@ -95,6 +95,7 @@ services:
       - /mnt/slow-data-pool-1/apps/paperless/media:/usr/src/paperless/media
       - /mnt/slow-data-pool-1/apps/paperless/export:/usr/src/paperless/export
       - /mnt/slow-data-pool-1/apps/paperless/consume:/usr/src/paperless/consume
+      - /mnt/slow-data-pool-1/apps/paperless/trash_archive:/usr/src/paperless/trash_archive
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
@@ -139,6 +140,9 @@ services:
       USERMAP_GID: 1000
       PAPERLESS_FILENAME_FORMAT: "{{ correspondent }}/{{ created_year }}/{{ title }}"
       PAPERLESS_FILENAME_FORMAT_REMOVE_NONE: "true" 
+      PAPERLESS_TRASH_DIR: "/usr/src/paperless/trash_archive"
+      PAPERLESS_AUDIT_LOG_ENABLED: "true"
+      PAPERLESS_LOGROTATE_MAX_BACKUPS: "1000"
 
   ofelia:
     image: mcuadros/ofelia:latest
