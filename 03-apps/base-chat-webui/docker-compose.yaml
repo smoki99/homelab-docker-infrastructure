@@ -1,0 +1,92 @@
+name: base-chat-webui
+
+services:
+  web:
+    image: ghcr.io/smoki99/base-chat-webui-web:latest
+    networks:
+      - default
+      - proxy
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=proxy'
+      # ROUTER: Frontend Static UI
+      - 'traefik.http.routers.base-chat-web.rule=Host(`webchat.vr-worlds.eu`)'
+      - 'traefik.http.routers.base-chat-web.entrypoints=web'
+      - 'traefik.http.services.base-chat-web.loadbalancer.server.port=8080'
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  api:
+    image: ghcr.io/smoki99/base-chat-webui-api:latest
+    networks:
+      default:
+        aliases:
+          - api-service
+      proxy:
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=proxy'
+      # ROUTER: Backend API Proxy
+      - 'traefik.http.routers.base-chat-api.rule=Host(`webchat.vr-worlds.eu`) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.base-chat-api.entrypoints=web'
+      - 'traefik.http.services.base-chat-api.loadbalancer.server.port=4001'
+    expose:
+      - '4001'
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: '4001'
+      EXPRESS_RATE_LIMIT_VALIDATE: 'false'
+      RATE_LIMIT_VALIDATE: 'false'
+      TRUST_PROXY: 'true'
+      CHAT_PROVIDER: ${CHAT_PROVIDER}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL}
+      VOICE_SERVICE_URL: ${VOICE_SERVICE_URL}
+      # MATCHING STRING 1
+      DATABASE_URL: postgres://chatbot:my88SecetPasswordForPoSTGRESS@postgres-db:5432/chatbot
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      MCP_CONFIG_FILE: /app/apps/api/mcp-config.json
+      MCP_ENABLED_SERVERS: sql,admin-db
+    volumes:
+      - prompt-data:/app/apps/api/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    networks:
+      default:
+        aliases:
+          - postgres-db
+    environment:
+      POSTGRES_USER: chatbot
+      # MATCHING STRING 2 (Explicitly set to match the API connection)
+      POSTGRES_PASSWORD: 'my88SecetPasswordForPoSTGRESS'
+      POSTGRES_DB: chatbot
+    volumes:
+      # CHANGED: Swapped to 'pgdata-v2' to completely bypass the old, broken data cache folder on your disk
+      - pgdata-v2:/var/lib/postgresql/data
+      - /data/compose/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - /data/compose/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U chatbot -d chatbot']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  proxy:
+    external: true
+  default:
+
+volumes:
+  # Initialized fresh volume name
+  pgdata-v2:
+  prompt-data:
