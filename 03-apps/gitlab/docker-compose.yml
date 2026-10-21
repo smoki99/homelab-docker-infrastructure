@@ -37,8 +37,10 @@ services:
     shm_size: '256m'
 
     networks:
-      - gitlab-net
-      - proxy
+      gitlab-net:
+        aliases:
+          - gitlab
+      proxy:
 
     labels:
       - 'traefik.enable=true'
@@ -65,6 +67,7 @@ services:
 
 networks:
   gitlab-net:
+    name: gitlab-net       # <-- Fix: Ensures exact network name across all containers
     driver: bridge
   proxy:
     external: true

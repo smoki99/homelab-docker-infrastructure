@@ -1,0 +1,67 @@
+name: figcraft-stack
+
+networks:
+  proxy:
+    external: true  # Joins the global "proxy" network created by your Traefik setup
+    name: proxy
+  internal:
+    internal: true  # Private network for internal server communication
+
+services:
+  # ---------------------------------------------------------------------------
+  # FigCraft Web (WebAssembly Frontend)
+  # ---------------------------------------------------------------------------
+  web:
+    container_name: figcraft-web
+    image: ghcr.io/storytold/figcraft-web:latest
+    # If building locally from source, uncomment the build section:
+    # build:
+    #   context: .
+    #   dockerfile: packaging/web/Dockerfile
+    restart: always
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.figcraft-web.rule=Host(`figcraft.vr-worlds.eu`)
+      - traefik.http.routers.figcraft-web.entrypoints=web
+      - traefik.http.services.figcraft-web.loadbalancer.server.port=8080
+
+      # Force HTTPS scheme headers for Wasm asset loaders
+      - traefik.http.routers.figcraft-web.middlewares=figcraft-headers
+      - traefik.http.middlewares.figcraft-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.figcraft-headers.headers.customresponseheaders.X-Forwarded-Proto=https
+
+  # ---------------------------------------------------------------------------
+  # FigCraft Server (Collaboration & Persistence Engine)
+  # ---------------------------------------------------------------------------
+  server:
+    container_name: figcraft-server
+    image: ghcr.io/storytold/figcraft-server:latest
+    # If building locally from source, uncomment the build section:
+    # build:
+    #   context: .
+    #   dockerfile: packaging/server/Dockerfile
+    restart: always
+    environment:
+      - RUST_LOG=info
+      - FIGCRAFT_HOST=0.0.0.0
+      - FIGCRAFT_PORT=47900
+      - FIGCRAFT_PUBLIC_URL=https://figcraft-server.vr-worlds.eu
+    volumes:
+      - ${FIGCRAFT_DATA_PATH:-./data}:/data:rw
+    networks:
+      - proxy
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.figcraft-server.rule=Host(`figcraft-server.vr-worlds.eu`)
+      - traefik.http.routers.figcraft-server.entrypoints=web
+      - traefik.http.services.figcraft-server.loadbalancer.server.port=47900
+
+      # Traefik WebSocket & TLS reverse-proxy headers
+      - traefik.http.routers.figcraft-server.middlewares=figcraft-server-headers
+      - traefik.http.middlewares.figcraft-server-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.figcraft-server-headers.headers.customresponseheaders.X-Forwarded-Proto=https
