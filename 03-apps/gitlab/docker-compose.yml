@@ -22,6 +22,19 @@ services:
         gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
         gitlab_rails['time_zone'] = '${GITLAB_TIMEZONE}'
 
+        ### --- CONTAINER REGISTRY SETTINGS --- ###
+        registry_external_url 'https://registry.vr-worlds.eu'
+        gitlab_rails['registry_enabled'] = true
+        registry_nginx['listen_port'] = 80
+        registry_nginx['listen_https'] = false
+        registry_nginx['proxy_set_headers'] = {
+          "Host" => "$$http_host",
+          "X-Real-IP" => "$$remote_addr",
+          "X-Forwarded-For" => "$$proxy_add_x_forwarded_for",
+          "X-Forwarded-Proto" => "https",
+          "X-Forwarded-Ssl" => "on"
+        }
+
     ports:
       - '${GITLAB_SSH_PORT}:22'
 
@@ -41,11 +54,21 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=proxy'
+
+      # --- GitLab UI & Git Router ---
       - 'traefik.http.routers.gitlab.rule=Host(`gitlab.vr-worlds.eu`)'
       - 'traefik.http.routers.gitlab.entrypoints=web'
       - 'traefik.http.routers.gitlab.service=gitlab'
       - 'traefik.http.routers.gitlab.middlewares=gitlab-https-headers@docker'
       - 'traefik.http.services.gitlab.loadbalancer.server.port=80'
+
+      # --- GitLab Container Registry Router ---
+      - 'traefik.http.routers.gitlab-registry.rule=Host(`registry.vr-worlds.eu`)'
+      - 'traefik.http.routers.gitlab-registry.entrypoints=web'
+      - 'traefik.http.routers.gitlab-registry.service=gitlab'
+      - 'traefik.http.routers.gitlab-registry.middlewares=gitlab-https-headers@docker'
+
+      # --- Shared Headers Middleware ---
       - 'traefik.http.middlewares.gitlab-https-headers.headers.customrequestheaders.X-Forwarded-Proto=https'
       - 'traefik.http.middlewares.gitlab-https-headers.headers.customrequestheaders.X-Forwarded-Ssl=on'
 
