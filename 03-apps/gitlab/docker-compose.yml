@@ -6,15 +6,12 @@ services:
     container_name: gitlab
     hostname: ${GITLAB_DOMAIN}
     restart: always
-
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://gitlab.vr-worlds.eu'
-
         nginx['listen_port'] = 80
         nginx['listen_https'] = false
         gitlab_rails['gitlab_https'] = true
-
         nginx['proxy_set_headers'] = {
           "Host" => "$$http_host",
           "X-Real-IP" => "$$remote_addr",
@@ -22,7 +19,6 @@ services:
           "X-Forwarded-Proto" => "https",
           "X-Forwarded-Ssl" => "on"
         }
-
         gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
         gitlab_rails['time_zone'] = '${GITLAB_TIMEZONE}'
 
@@ -40,7 +36,7 @@ services:
       gitlab-net:
         aliases:
           - gitlab
-      proxy:
+      proxy: {}
 
     labels:
       - 'traefik.enable=true'
@@ -67,7 +63,7 @@ services:
 
 networks:
   gitlab-net:
-    name: gitlab-net       # <-- Fix: Ensures exact network name across all containers
+    name: gitlab-net
     driver: bridge
   proxy:
     external: true
