@@ -8,21 +8,34 @@ networks:
     driver: bridge
 
 services:
-  api:
-    container_name: customer-portal-api
-    image: registry.vr-worlds.eu/smoki/customer-portal-v2/api:latest
+  postgres:
+    image: postgres:16
     restart: unless-stopped
     environment:
-      HOST: 0.0.0.0
-      PORT: '4001'
-      SEED_DATA_FILE: /app/seed/seed-data.json
+      POSTGRES_DB: customer_portal
+      POSTGRES_USER: portal
+      POSTGRES_PASSWORD: portal
+    volumes:
+      - portal_pgdata:/var/lib/postgresql/data
+    networks:
+      - portal-backend
+
+  api:
+    image: registry.vr-worlds.eu/smoki/customer-portal-v2/backend:latest
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      PORTAL_DB_URL: 'jdbc:postgresql://postgres:5432/customer_portal'
+      PORTAL_DB_USER: portal
+      PORTAL_DB_PASSWORD: portal
     expose:
       - '4001'
     networks:
       - portal-backend
 
   web:
-    container_name: customer-portal-web
     image: registry.vr-worlds.eu/smoki/customer-portal-v2/web:latest
     restart: unless-stopped
     depends_on:
@@ -38,3 +51,6 @@ services:
       - traefik.http.services.customer-portal.loadbalancer.server.port=80
       - traefik.http.routers.customer-portal.middlewares=portal-headers
       - traefik.http.middlewares.portal-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+
+volumes:
+  portal_pgdata:
