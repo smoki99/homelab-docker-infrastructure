@@ -1,30 +1,43 @@
-name: desktop-stack
+name: customer-portal-stack
 
 networks:
   proxy:
     external: true
     name: proxy
+  internal:
+    internal: true
 
 services:
-  desktop:
-    container_name: linux-desktop
-    image: accetto/ubuntu-vnc-xfce-g3:latest
-    restart: always
-    shm_size: "1gb"
+  api:
+    container_name: customer-portal-api
+    image: registry.vr-worlds.eu/smoki/customer-portal-v2/api:latest
+    restart: unless-stopped
     environment:
-      - VNC_PW=${DESKTOP_VNC_PASSWORD}
-      - VNC_RESOLUTION=1280x720
+      HOST: 0.0.0.0
+      PORT: '4001'
+      SEED_DATA_FILE: /app/seed/seed-data.json
+    expose:
+      - '4001'
+    networks:
+      - internal
+
+  web:
+    container_name: customer-portal-web
+    image: registry.vr-worlds.eu/smoki/customer-portal-v2/web:latest
+    restart: unless-stopped
+    depends_on:
+      - api
     networks:
       - proxy
-    volumes:
-      - ${DESKTOP_APP_DATASET_CONFIG}:/home/headless
+      - internal
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-      - traefik.http.routers.webtop.rule=Host(`desktop.vr-worlds.eu`)
-      - traefik.http.routers.webtop.entrypoints=web
-      # 🎯 noVNC listens on HTTP port 6901:
-      - traefik.http.services.webtop.loadbalancer.server.port=6901
+      # Adjust domain name(s) below to your actual Cloudflare DNS record:
+      - traefik.http.routers.customer-portal.rule=Host(`cupo-demo1.vr-worlds.eu`) || Host(`cupo-demo1.vr-worlds.de`)
+      - traefik.http.routers.customer-portal.entrypoints=web
+      - traefik.http.services.customer-portal.loadbalancer.server.port=80
 
-      # 🔒 Microsoft Entra ID Protection
-      - traefik.http.routers.webtop.middlewares=entra-auth@docker
+      # Informs the application/Nginx behind Cloudflare that client traffic is HTTPS
+      - traefik.http.routers.customer-portal.middlewares=portal-headers
+      - traefik.http.middlewares.portal-headers.headers.customrequestheaders.X-Forwarded-Proto=https

@@ -1,0 +1,40 @@
+name: customer-portal-stack
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+  portal-backend:
+    driver: bridge
+
+services:
+  api:
+    container_name: customer-portal-api
+    image: registry.vr-worlds.eu/smoki/customer-portal-v2/api:latest
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: '4001'
+      SEED_DATA_FILE: /app/seed/seed-data.json
+    expose:
+      - '4001'
+    networks:
+      - portal-backend
+
+  web:
+    container_name: customer-portal-web
+    image: registry.vr-worlds.eu/smoki/customer-portal-v2/web:latest
+    restart: unless-stopped
+    depends_on:
+      - api
+    networks:
+      - proxy
+      - portal-backend
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.customer-portal.rule=Host(`cupo-demo1.vr-worlds.eu`)
+      - traefik.http.routers.customer-portal.entrypoints=web
+      - traefik.http.services.customer-portal.loadbalancer.server.port=80
+      - traefik.http.routers.customer-portal.middlewares=portal-headers
+      - traefik.http.middlewares.portal-headers.headers.customrequestheaders.X-Forwarded-Proto=https
